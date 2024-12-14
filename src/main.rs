@@ -1,10 +1,14 @@
-use hangman::HangmanGame;
+#[allow(unused)]
+// #[allow(unused_imports)]
+
+mod game;
+use game::HangmanGame;
+
+
 
 fn main() {
+    let phrase = "Roo? And Ginger?!".to_string();
+    let mut game = HangmanGame::new(&phrase);
 
-    let Ok(mut game) = HangmanGame::new() else {
-        panic!("oh no!")
-    };
-
-    game.play();
+    let _ = game.play();
 }
