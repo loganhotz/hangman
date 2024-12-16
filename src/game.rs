@@ -242,9 +242,15 @@ impl HangmanGame {
             GameBoard::move_caret_to(Position { row: 10, col: 1 });
             GameBoard::print("Congratulations, you won Rusty Hangman!");
         } else {
+            // before exiting the game we add the last limb to the hangman,
+            // and fill in the secret word
+            self.print_body().unwrap();
+            GameBoard::move_caret_to(PHRASE_LOCATION).unwrap();
+            GameBoard::print(&self.phrase);
+
             GameBoard::move_caret_to(Position { row: 10, col: 1 });
             GameBoard::print("You were not able to figure out the secret phrase :(\n");
-            GameBoard::print("\r\nThank you for playing Rusty Hangman.");
+            GameBoard::print("\r\nThank you for playing Rusty Hangman.\n");
         }
     }
 
