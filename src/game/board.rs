@@ -5,10 +5,7 @@
 use crossterm::cursor::MoveTo;
 use crossterm::style::Print;
 use crossterm::terminal::{
-    disable_raw_mode, enable_raw_mode,
-    size,
     Clear, ClearType,
-    EnterAlternateScreen, LeaveAlternateScreen,
 };
 use crossterm::{
     queue,
@@ -20,12 +17,6 @@ use std::io::{
     Error
 };
 
-
-#[derive(Debug, Copy, Clone)]
-pub struct Size {
-    height: usize,
-    width: usize,
-}
 
 #[derive(Debug, Copy, Clone)]
 pub struct Position {
@@ -52,23 +43,16 @@ pub struct GameBoard {
 impl GameBoard {
 
     pub fn initialize() -> Result<(), Error> {
-        // enable_raw_mode()?;
-        Self::enter_alternate_screen()?;
         Self::clear_screen()?;
         Self::reset_caret()?;
         Self::execute()?;
 
-        let sz = Self::size()?;
-        // println!("{sz:?}");
-        // let _z = sz.width * sz.height;
 
         Ok(())
     }
 
     pub fn terminate() -> Result<(), Error> {
-        // Self::leave_alternate_screen()?;
         Self::execute()?;
-        // disable_raw_mode()?;
 
         Ok(())
     }
@@ -88,15 +72,6 @@ impl GameBoard {
         Ok(())
     }
 
-    fn enter_alternate_screen() -> Result<(), Error> {
-        Self::queue_command(EnterAlternateScreen)?;
-        Ok(())
-    }
-
-    fn leave_alternate_screen() -> Result<(), Error> {
-        Self::queue_command(LeaveAlternateScreen)?;
-        Ok(())
-    }
 
     pub fn print(string: &str) -> Result<(), Error> {
         Self::queue_command(Print(string))?;
@@ -178,21 +153,5 @@ impl GameBoard {
     }
 
     // endregion
-
-    /// Returns the current size of this Terminal.
-    /// Edge Case for systems with `usize` < `u16`:
-    /// * A `Size` representing the terminal size. Any coordinate `z` truncated
-    /// to `usize` if `usize` < `z` < `u16`
-    pub fn size() -> Result<Size, Error> {
-        let (width_u16, height_u16) = size()?;
-        // clippy::as_conversions: See doc above
-        // #[allow(clippy::as_conversions)]
-        let height = height_u16 as usize;
-        // clippy::as_conversions: See doc above
-        // #[allow(clippy::as_conversions)]
-        let width = width_u16 as usize;
-
-        Ok(Size { height, width })
-    }
 
 }

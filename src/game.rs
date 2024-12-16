@@ -103,10 +103,6 @@ impl HangmanGame {
 
         GameBoard::initialize()?;
 
-        // we accept full-string guesses, but will only use the first
-        // char when evaluating
-        let mut guess = String::new();
-
         while !self.should_quit {
             GameBoard::clear_screen()?;
             GameBoard::reset_caret()?;
@@ -115,16 +111,16 @@ impl HangmanGame {
             self.print_body()?;
             self.print_guess_list()?;
 
-            self.issue_hidden_phrase();
-            Self::prompt_guess();
+            self.issue_hidden_phrase()?;
+            Self::prompt_guess()?;
 
             GameBoard::execute()?;
 
-            guess = self.read_guess();
+            let guess = self.read_guess();
             self.evaluate_guess(&guess);
         }
 
-        self.issue_goodbye();
+        self.issue_goodbye()?;
 
         GameBoard::terminate()?;
         
@@ -208,50 +204,52 @@ impl HangmanGame {
         phrase
     }
 
-    fn issue_correct_guess(&mut self, guess: &char) {
+    fn issue_correct_guess(&mut self, _guess: &char) {
         // println!("`{}` is in the secret phrase!", guess);
         if self.construct_hidden_phrase() == self.phrase {
             self.should_quit = true;
         }
     }
 
-    fn issue_duplicate_guess(&self, guess: &char) {
+    fn issue_duplicate_guess(&self, _guess: &char) {
         // println!("`{}` has already been guessed", guess);
     }
 
     fn issue_hidden_phrase(&self) -> Result<(), Error> {
         GameBoard::move_caret_to(PHRASE_LOCATION)?;
-        GameBoard::print(&self.construct_hidden_phrase());
+        GameBoard::print(&self.construct_hidden_phrase())?;
 
         Ok(())
     }
 
-    fn issue_incorrect_guess(&self, guess: &char) {
+    fn issue_incorrect_guess(&self, _guess: &char) {
         // println!("`{}` is not in the secret phrase :(", guess);
     }
 
-    fn issue_invalid_guess(&self, guess: &char) {
+    fn issue_invalid_guess(&self, _guess: &char) {
         // println!("invalid guess: `{}`", guess);
     }
 
-    fn issue_goodbye(&self) {
-        self.issue_hidden_phrase();
-        GameBoard::execute();
+    fn issue_goodbye(&self) -> Result<(), Error> {
+        self.issue_hidden_phrase()?;
+        GameBoard::execute()?;
 
         if self.lives > 0 {
-            GameBoard::move_caret_to(Position { row: 10, col: 1 });
-            GameBoard::print("Congratulations, you won Rusty Hangman!");
+            GameBoard::move_caret_to(Position { row: 10, col: 1 })?;
+            GameBoard::print("Congratulations, you won Rusty Hangman!")?;
         } else {
             // before exiting the game we add the last limb to the hangman,
             // and fill in the secret word
-            self.print_body().unwrap();
-            GameBoard::move_caret_to(PHRASE_LOCATION).unwrap();
-            GameBoard::print(&self.phrase);
+            self.print_body()?;
+            GameBoard::move_caret_to(PHRASE_LOCATION)?;
+            GameBoard::print(&self.phrase)?;
 
-            GameBoard::move_caret_to(Position { row: 10, col: 1 });
-            GameBoard::print("You were not able to figure out the secret phrase :(\n");
-            GameBoard::print("\r\nThank you for playing Rusty Hangman.\n");
+            GameBoard::move_caret_to(Position { row: 10, col: 1 })?;
+            GameBoard::print("You were not able to figure out the secret phrase :(\n")?;
+            GameBoard::print("\r\nThank you for playing Rusty Hangman.\n")?;
         }
+
+        Ok(())
     }
 
     fn prompt_guess() -> Result<(), Error> {
@@ -291,7 +289,7 @@ impl HangmanGame {
             .map(|x| x.to_string())
             .collect::<Vec<_>>()
             .join(", ");
-        GameBoard::print(&guess_list);
+        GameBoard::print(&guess_list)?;
 
         Ok(())
     }
